@@ -6,12 +6,19 @@
       </div>
     </div>
     <div class="row mb-3">
-      <create-todo @on-new-todo="addTodo($event)" />
+      <form class="col-12 col-sm-10 col-md-8 cl-lg-6" @submit.prevent="addTodo()">
+        <input
+          v-model="newTodo.description"
+          type="text"
+          class="form-control"
+          placeholder="Create a new to-do..."
+        />
+      </form>
     </div>
     <div class="row">
       <div class="col-12 col-sm-10 col-lg-6">
         <ul class="list-group">
-          <todo
+          <todo-item
             v-for="todo in todos"
             :key="todo.id"
             :description="todo.description"
@@ -27,16 +34,19 @@
 </template>
 
 <script>
-import axios from 'axios'
-import Todo from "./Todo.vue";
-import CreateTodo from "./CreateTodo.vue";
+import TodoItem from "./Todo.vue";
+import { Todo } from '../models'
 
 export default {
   props: {
     listName: String,
   },
+  components: { 
+    TodoItem
+  },
   data() {
     return {
+      newTodo: new Todo(),
       todos: [
         { description: "Do the dishes", completed: false },
         { description: "Take out the trash", completed: false },
@@ -45,30 +55,28 @@ export default {
     };
   },
   async mounted () {
-    const { data } = await axios.get('http://localhost:3000/todos')
-    this.todos = data
+    this.todos = await Todo.list()
   },
   methods: {
-    async addTodo(newTodo) {
-      const { data } = await axios.post('http://localhost:3000/todos', { 
-        description: newTodo, completed: false 
-      })
-      this.todos.push(data)
+    async addTodo() {
+      await this.newTodo.save()
+      this.todos.push(this.newTodo)
+
+      this.newTodo = new Todo()
     },
     async toggleTodo(todo) {
       todo.completed = !todo.completed;
-      await axios.put(`http://localhost:3000/todos/${todo.id}`, todo)
+      await todo.save()
     },
     async deleteTodo(deletedTodo) {
-      await axios.delete(`http://localhost:3000/todos/${deletedTodo.id}`)
+      await deletedTodo.destroy()
       this.todos = this.todos.filter(todo => todo !== deletedTodo)
     },
     async editTodo(todo, newTodoDescription) {
       todo.description = newTodoDescription;
-      await axios.put(`http://localhost:3000/todos/${todo.id}`, todo)
+      await todo.save()
     }
-  },
-  components: { Todo, CreateTodo },
+  }
 };
 </script>
 
