@@ -12,8 +12,8 @@
       <div class="col-12 col-sm-10 col-lg-6">
         <ul class="list-group">
           <todo
-            v-for="(todo, index) in todos"
-            :key="index"
+            v-for="todo in todos"
+            :key="todo.id"
             :description="todo.description"
             :completed="todo.completed"
             @on-toggle="toggleTodo(todo)"
@@ -27,6 +27,7 @@
 </template>
 
 <script>
+import axios from 'axios'
 import Todo from "./Todo.vue";
 import CreateTodo from "./CreateTodo.vue";
 
@@ -43,19 +44,29 @@ export default {
       ],
     };
   },
+  async mounted () {
+    const { data } = await axios.get('http://localhost:3000/todos')
+    this.todos = data
+  },
   methods: {
-    addTodo(newTodo) {
-      this.todos.push({ description: newTodo, completed: false });
+    async addTodo(newTodo) {
+      const { data } = await axios.post('http://localhost:3000/todos', { 
+        description: newTodo, completed: false 
+      })
+      this.todos.push(data)
     },
-    toggleTodo(todo) {
+    async toggleTodo(todo) {
       todo.completed = !todo.completed;
+      await axios.put(`http://localhost:3000/todos/${todo.id}`, todo)
     },
-    deleteTodo(deletedTodo) {
-      this.todos = this.todos.filter(todo => todo !== deletedTodo);
+    async deleteTodo(deletedTodo) {
+      await axios.delete(`http://localhost:3000/todos/${deletedTodo.id}`)
+      this.todos = this.todos.filter(todo => todo !== deletedTodo)
     },
-    editTodo(todo, newTodoDescription) {
+    async editTodo(todo, newTodoDescription) {
       todo.description = newTodoDescription;
-    },
+      await axios.put(`http://localhost:3000/todos/${todo.id}`, todo)
+    }
   },
   components: { Todo, CreateTodo },
 };
