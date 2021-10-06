@@ -1,1 +1,1 @@
-export { default as Todo } from './todo'
+export { Todo, Todos } from './todo'

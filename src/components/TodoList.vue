@@ -46,23 +46,22 @@ export default {
   },
   data() {
     return {
-      newTodo: new Todo(),
-      todos: [
-        { description: "Do the dishes", completed: false },
-        { description: "Take out the trash", completed: false },
-        { description: "Finish doing laundry", completed: false },
-      ],
-    };
+      newTodo: {},
+      todos: []
+    }
   },
   async mounted () {
     this.todos = await Todo.list()
+    this.newTodo = this.todos.new()
   },
   methods: {
     async addTodo() {
       await this.newTodo.save()
-      this.todos.push(this.newTodo)
 
-      this.newTodo = new Todo()
+      // 不需要显示地将 newTodo 添加进 todo 列表
+      // this.todos.push(this.newTodo)
+
+      this.newTodo = this.todos.new()
     },
     async toggleTodo(todo) {
       todo.completed = !todo.completed;
@@ -70,14 +69,14 @@ export default {
     },
     async deleteTodo(deletedTodo) {
       await deletedTodo.destroy()
-      this.todos = this.todos.filter(todo => todo !== deletedTodo)
+
+      // 不需要显示地将 deletedTodo 从 todo 列表中删除，此时已经自动从中被删除
+      // this.todos = this.todos.filter(todo => todo !== deletedTodo)
     },
     async editTodo(todo, newTodoDescription) {
       todo.description = newTodoDescription;
       await todo.save()
     }
   }
-};
+}
 </script>
-
-<style scoped lang="scss"></style>

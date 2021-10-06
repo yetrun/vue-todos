@@ -1,5 +1,5 @@
 import axios from 'axios'
-import Model from './model'
+import { Model, Collection } from './base'
 
 const Todo = Model.extend({
   attributes: {
@@ -13,22 +13,25 @@ const Todo = Model.extend({
         const { data } = await axios.put(`http://localhost:3000/todos/${this.id}`, this.attributes)
         this.attributes = data
       } else {
-        const attributes = this.attributes
-        delete attributes.id
-        const { data } = await axios.post('http://localhost:3000/todos', attributes)
+        const { data } = await axios.post('http://localhost:3000/todos', this.attributes)
         this.attributes = data
       }
     },
     async destroy () {
       await axios.delete(`http://localhost:3000/todos/${this.id}`)
+      this.destroyed = true
     }
   },
   static: {
     async list () {
       const { data } = await axios.get('http://localhost:3000/todos')
-      return data.map(item => new Todo(item))
+      return new Todos(data)
     }
   }
 })
 
-export default Todo
+const Todos = Collection.extend({
+  model: Todo
+})
+
+export { Todo, Todos }
