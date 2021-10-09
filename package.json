@@ -8,6 +8,7 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "ar-front": "https://github.com/yetrun/ar-front.git",
     "axios": "^0.22.0",
     "core-js": "^3.6.4",
     "vue": "^2.6.11"
